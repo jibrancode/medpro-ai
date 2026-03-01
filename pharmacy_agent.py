@@ -1,11 +1,25 @@
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
-from langfuse.decorators import observe
 from db import check_stock, execute_action
 
 # Load environment variables from .env file
 load_dotenv()
+
+# --- Langfuse Observability Setup ---
+try:
+    from langfuse import Langfuse
+    langfuse_client = Langfuse(
+        public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
+        secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
+        host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
+    )
+    LANGFUSE_ENABLED = True
+    print("Langfuse Observability: ENABLED")
+except Exception as e:
+    langfuse_client = None
+    LANGFUSE_ENABLED = False
+    print(f"Langfuse Observability: DISABLED ({e})")
 
 # Get API key from environment
 api_key = os.getenv("GEMINI_API_KEY")
@@ -41,7 +55,6 @@ Rules:
 - If the user mentions symptoms, search for relevant categories.
 """
 
-
 # Initialize the model with the tool and system instructions
 if api_key:
     model = genai.GenerativeModel(
@@ -54,21 +67,41 @@ else:
     model = None
     chat_session = None
 
-@observe(name="PharmacyAgentChat")
+
 def chat_with_agent(user_message: str) -> str:
     """
-    Sends the user message to the Gemini AI Agent. 
-    The Agent can automatically use defined tools.
+    Sends the user message to the Gemini AI Agent, with Langfuse tracing.
     """
     if not chat_session:
         return "Error: Gemini API key is missing. Please check your .env file."
-        
+
+    # Start a Langfuse trace for this interaction
+    trace = None
+    if LANGFUSE_ENABLED:
+        try:
+            trace = langfuse_client.trace(
+                name="PharmacyAgentChat",
+                input=user_message,
+                metadata={"model": "gemini-flash-latest", "app": "aMedPro"}
+            )
+        except Exception:
+            trace = None
+
     try:
-        # Langfuse will automatically capture input 'user_message' and the return 'response.text'
         response = chat_session.send_message(user_message)
-        return response.text
+        result = response.text
+
+        # Log the output to Langfuse
+        if trace:
+            trace.update(output=result)
+            langfuse_client.flush()
+
+        return result
+
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
+        if trace:
+            trace.update(output=f"Error: {str(e)}")
         if "429" in str(e):
             return "The AI is currently receiving too many requests. Please wait a moment and try again."
         return f"I apologize, but I am having trouble processing your request right now ({str(e)[:50]}...)"

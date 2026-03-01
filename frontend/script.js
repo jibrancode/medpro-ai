@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Global Application State (Storage) ---
     let currentUser = null;
-    let notifications = JSON.parse(localStorage.getItem('amedpro_notifications') || '[]');
+    let notifications = JSON.parse(localStorage.getItem('MedPro_notifications') || '[]');
 
     // Hackathon Requirement: Ensure System Logs exist
     if (notifications.length === 0) {
         const startupLogs = [
-            { type: 'stock_update', title: 'System Initialized', message: 'aMedPro Mock Database (SQLite) connected.', time: now.toLocaleTimeString() },
+            { type: 'stock_update', title: 'System Initialized', message: 'MedPro Mock Database (SQLite) connected.', time: now.toLocaleTimeString() },
             { type: 'stock_update', title: 'Webhook Bridge Active', message: 'Ready to execute real-world tool actions.', time: now.toLocaleTimeString() }
         ];
         notifications = [...startupLogs];
-        localStorage.setItem('amedpro_notifications', JSON.stringify(notifications));
+        localStorage.setItem('MedPro_notifications', JSON.stringify(notifications));
     }
 
 
@@ -2028,9 +2028,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ];
 
-    let savedMedicines = JSON.parse(localStorage.getItem('amedpro_medicines'));
+    let savedMedicines = JSON.parse(localStorage.getItem('MedPro_medicines'));
     let medicinesDb = savedMedicines && savedMedicines.length > 50 ? savedMedicines : dummyMedicinesBackup;
-    let rxRequestsDb = JSON.parse(localStorage.getItem('amedpro_requests')) || [];
+    let rxRequestsDb = JSON.parse(localStorage.getItem('MedPro_requests')) || [];
 
     // Auto-Removal Check On Load
     function autoPruneExpiredMeds() {
@@ -2042,21 +2042,21 @@ document.addEventListener('DOMContentLoaded', () => {
             saveMedicines();
             // In a real app, this would use a notification system. Over here we just log and maybe alert later if pharmacist logs in.
             console.warn("Expired or empty stock medicines were automatically removed.");
-            localStorage.setItem('amedpro_notif', 'System auto-removed expired or 0-stock medications.');
+            localStorage.setItem('MedPro_notif', 'System auto-removed expired or 0-stock medications.');
         }
     }
     autoPruneExpiredMeds();
 
     function saveMedicines() {
-        localStorage.setItem('amedpro_medicines', JSON.stringify(medicinesDb));
+        localStorage.setItem('MedPro_medicines', JSON.stringify(medicinesDb));
     }
 
     function saveRequests() {
-        localStorage.setItem('amedpro_requests', JSON.stringify(rxRequestsDb));
+        localStorage.setItem('MedPro_requests', JSON.stringify(rxRequestsDb));
     }
 
     // --- IndexedDB Authentication Setup ---
-    const dbName = "aMedProDB";
+    const dbName = "MedProDB";
     let db;
     const request = indexedDB.open(dbName, 1);
 
@@ -2230,7 +2230,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderAdminData();
                 switchTab('tab-admin-users', 'admin-tabs-nav');
             } else {
-                headerTitle.textContent = 'aMedPro Patient Portal';
+                headerTitle.textContent = 'MedPro Patient Portal';
                 headerIcon.className = 'fa-solid fa-bed-pulse';
                 document.getElementById('tabs-nav').style.display = 'flex';
                 renderDashboardData();
@@ -2596,7 +2596,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Persist to localStorage
-        localStorage.setItem('amedpro_notifications', JSON.stringify(notifications));
+        localStorage.setItem('MedPro_notifications', JSON.stringify(notifications));
 
         // Update badge
         const badge = document.getElementById('notif-badge');
@@ -2963,8 +2963,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         to_email: currentUser.username,
-                        subject: "aMedPro: Order Confirmation",
-                        message: `Hello ${currentUser.fullName || 'User'},\n\nYour order for ${newHistory.name} (${newHistory.price}) has been confirmed successfully.\nOrder ID: #${newHistory.id}\n\nThank you for choosing aMedPro!`
+                        subject: "MedPro: Order Confirmation",
+                        message: `Hello ${currentUser.fullName || 'User'},\n\nYour order for ${newHistory.name} (${newHistory.price}) has been confirmed successfully.\nOrder ID: #${newHistory.id}\n\nThank you for choosing MedPro!`
                     })
                 }).catch(err => console.error("Email API failed:", err));
             }
