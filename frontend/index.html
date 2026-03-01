@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Pharmacist Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for the mic and send icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Login Portal -->
+    <div class="login-container" id="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="avatar avatar-large">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <h2>aMedPro Portal</h2>
+                <p>Please select your role and sign in</p>
+            </div>
+
+            <form id="auth-form" class="auth-form">
+                <div class="form-group" id="role-group">
+                    <label for="role-select">Select Role</label>
+                    <select id="role-select" required>
+                        <option value="user" selected>User</option>
+                        <option value="pharmacist">Pharmacist</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username / Email</label>
+                    <input type="text" id="username" required placeholder="Enter username or email">
+                </div>
+                <div class="form-group signup-only" style="display: none;">
+                    <label for="full-name">Full Name</label>
+                    <input type="text" id="full-name" placeholder="Enter full name">
+                </div>
+                <div class="form-group signup-only" style="display: none;">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" placeholder="Enter age">
+                </div>
+                <div class="form-group signup-only" style="display: none;">
+                    <label for="gender">Gender</label>
+                    <select id="gender">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter password">
+                </div>
+
+                <div class="auth-actions">
+                    <button type="button" id="login-btn" class="auth-btn primary-btn">Login</button>
+                    <button type="button" id="signup-toggle-btn" class="auth-btn secondary-btn">Create Account</button>
+                    <button type="button" id="signup-submit-btn" class="auth-btn primary-btn"
+                        style="display: none;">Sign Up</button>
+                    <button type="button" id="login-toggle-btn" class="auth-btn secondary-btn"
+                        style="display: none;">Back to Login</button>
+                </div>
+                <p id="auth-message" class="auth-message"></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="chat-container dashboard-layout" id="chat-container" style="display: none;">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="header-info">
+                <div class="avatar">
+                    <i class="fa-solid fa-user-doctor"></i>
+                </div>
+                <div class="user-display-info">
+                    <h1 id="header-title">AI Pharmacist Assistant</h1>
+                    <div class="user-meta-info">
+                        <span class="status">Online</span>
+                        <span class="user-id-badge" id="user-id-display">ID: ---</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn notif-btn" id="notif-btn" aria-label="Notifications">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notif-badge" id="notif-badge" style="display: none;"></span>
+                </button>
+                <button class="icon-btn logout-btn" id="logout-btn" aria-label="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tabs Navigation (Only for User) -->
+        <nav class="tabs-nav user-nav" id="tabs-nav" style="display: none;">
+            <button class="nav-btn active" data-target="tab-chat">
+                <i class="fa-solid fa-comments"></i> Chat
+            </button>
+            <button class="nav-btn" data-target="tab-medicines">
+                <i class="fa-solid fa-pills"></i> Store
+            </button>
+            <button class="nav-btn" data-target="tab-history">
+                <i class="fa-solid fa-clock-rotate-left"></i> History
+            </button>
+            <button class="nav-btn" data-target="tab-refills">
+                <i class="fa-solid fa-prescription-bottle-medical"></i> Refills & Requests
+            </button>
+            <button class="nav-btn" data-target="tab-notifications">
+                <i class="fa-solid fa-bell"></i> Notifications
+            </button>
+        </nav>
+
+        <!-- Tabs Navigation (Pharmacist) -->
+        <nav class="tabs-nav pharmacist-nav" id="pharmacist-tabs-nav" style="display: none;">
+            <button class="nav-btn active" data-target="tab-pharm-requests">
+                <i class="fa-solid fa-clipboard-check"></i> Requests
+            </button>
+            <button class="nav-btn" data-target="tab-pharm-stock">
+                <i class="fa-solid fa-boxes-stacked"></i> Stock History
+            </button>
+            <button class="nav-btn" data-target="tab-pharm-manage">
+                <i class="fa-solid fa-pen-to-square"></i> Manage Stock
+            </button>
+            <button class="nav-btn" data-target="tab-notifications">
+                <i class="fa-solid fa-bell"></i> Notifications
+            </button>
+        </nav>
+
+        <!-- Tabs Navigation (Admin) -->
+        <nav class="tabs-nav admin-nav" id="admin-tabs-nav" style="display: none;">
+            <button class="nav-btn active" data-target="tab-admin-users">
+                <i class="fa-solid fa-users-gear"></i> Manage Roles
+            </button>
+            <button class="nav-btn" data-target="tab-admin-pharmacists">
+                <i class="fa-solid fa-user-doctor"></i> Pharmacists
+            </button>
+            <button class="nav-btn" data-target="tab-admin-analytics">
+                <i class="fa-solid fa-chart-line"></i> Analytics
+            </button>
+            <button class="nav-btn" data-target="tab-admin-inventory">
+                <i class="fa-solid fa-boxes-stacked"></i> Inventory & Refills
+            </button>
+            <button class="nav-btn" data-target="tab-notifications">
+                <i class="fa-solid fa-bell"></i> Notifications
+            </button>
+        </nav>
+
+        <!-- TAB: Chat -->
+        <div class="tab-content active-tab" id="tab-chat">
+            <!-- Chat Area -->
+            <main class="chat-window" id="chat-window">
+                <!-- Initial AI Message -->
+                <div class="message ai">
+                    <div class="message-content">
+                        <p>Hello! I am your AI Pharmacist Assistant. How can I help you today? You can use the
+                            suggestions below or type out your query.</p>
+                    </div>
+                </div>
+
+                <!-- Messages will be appended here via JS -->
+            </main>
+
+            <!-- Loading Indicator (Hidden by default) -->
+            <div class="loading-container" id="loading-indicator">
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <!-- Suggestion Chips -->
+            <div class="chat-suggestions" id="chat-suggestions">
+                <!-- Data populated by JS -->
+            </div>
+
+            <!-- Input Area fixed to bottom -->
+            <footer class="chat-footer">
+                <form id="chat-form" class="input-area">
+                    <button type="button" class="icon-btn mic-btn" id="mic-btn" aria-label="Use Microphone">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <div class="input-wrapper">
+                        <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off">
+                    </div>
+                    <button type="submit" class="icon-btn send-btn" id="send-btn" aria-label="Send Message">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </footer>
+        </div>
+
+        <!-- TAB: Medicines -->
+        <div class="tab-content" id="tab-medicines">
+            <h2 class="tab-title">Medicine Store</h2>
+            <div class="medicines-grid" id="medicines-grid">
+                <!-- Data populated by JS -->
+            </div>
+        </div>
+
+        <!-- TAB: History -->
+        <div class="tab-content" id="tab-history">
+            <div class="history-header">
+                <h2 class="tab-title">Purchase History</h2>
+                <button class="download-btn" id="download-history-btn">
+                    <i class="fa-solid fa-file-excel"></i> Download XLS
+                </button>
+            </div>
+            <div class="history-list" id="history-list">
+                <!-- Data populated by JS -->
+            </div>
+        </div>
+
+        <!-- TAB: Refills & Requests -->
+        <div class="tab-content" id="tab-refills">
+            <h2 class="tab-title">Refill Alerts</h2>
+            <div class="refills-list" id="refills-list">
+                <!-- Data populated by JS -->
+            </div>
+
+            <h3 class="section-subtitle">My Rx Requests</h3>
+            <div class="requests-list" id="user-requests-list">
+                <!-- Data populated by JS -->
+            </div>
+        </div>
+
+        <!-- Pharmacist Tabs -->
+        <!-- TAB: Pharm Requests -->
+        <div class="tab-content" id="tab-pharm-requests">
+            <h2 class="tab-title">Patient Rx Requests</h2>
+            <div class="requests-list" id="pharm-requests-list">
+                <!-- Data populated by JS -->
+            </div>
+        </div>
+
+        <!-- TAB: Pharm Stock -->
+        <div class="tab-content" id="tab-pharm-stock">
+            <div class="history-header">
+                <h2 class="tab-title">Available Stock</h2>
+                <button class="download-btn" id="download-stock-btn">
+                    <i class="fa-solid fa-file-excel"></i> Download XLS
+                </button>
+            </div>
+            <div class="medicines-grid" id="pharm-stock-grid">
+                <!-- Data populated by JS -->
+            </div>
+        </div>
+
+        <!-- TAB: Pharm Manage Stock -->
+        <div class="tab-content" id="tab-pharm-manage">
+            <h2 class="tab-title">Manage Inventory</h2>
+            <div class="manage-stock-container">
+                <form id="add-med-form" class="auth-form stock-form">
+                    <h3>Add / Update Medicine</h3>
+                    <div class="form-grid">
+                        <input type="text" id="new-med-name" placeholder="Medicine Name" required>
+                        <input type="text" id="new-med-type" placeholder="Category (e.g. Antibiotic)" required>
+                        <input type="number" id="new-med-price" placeholder="Price (₹)" required min="0">
+                        <select id="new-med-rx">
+                            <option value="false">No Rx Needed</option>
+                            <option value="true">Rx Required</option>
+                        </select>
+                        <input type="date" id="new-med-expiry" required title="Expiry Date">
+                        <input type="number" id="new-med-qty" placeholder="Stock Quantity" required min="1">
+                    </div>
+                    <button type="submit" class="auth-btn primary-btn" style="margin-top: 10px;"><i
+                            class="fa-solid fa-plus"></i> Save Medicine</button>
+                </form>
+                <div class="manage-list" id="pharm-manage-list">
+                    <!-- Data populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tabs -->
+        <!-- TAB: Admin User Management -->
+        <div class="tab-content" id="tab-admin-users">
+            <h2 class="tab-title">User & Role Management</h2>
+            <div class="admin-container">
+                <div class="search-bar-container" style="padding: 0 20px; margin-bottom: 20px;">
+                    <input type="text" id="admin-user-search" placeholder="Search users by name or email..."
+                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                </div>
+                <div class="user-list-table-container" style="padding: 0 20px;">
+                    <table class="admin-table"
+                        style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                        <thead style="background: var(--primary-blue); color: white;">
+                            <tr>
+                                <th style="padding: 12px; text-align: left;">Name</th>
+                                <th style="padding: 12px; text-align: left;">Email</th>
+                                <th style="padding: 12px; text-align: left;">Current Role</th>
+                                <th style="padding: 12px; text-align: left;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Admin Pharmacists -->
+        <div class="tab-content" id="tab-admin-pharmacists">
+            <h2 class="tab-title">Active Pharmacists</h2>
+            <div class="admin-container">
+                <div class="pharmacist-grid" id="admin-pharmacist-list"
+                    style="padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Admin Analytics -->
+        <div class="tab-content" id="tab-admin-analytics">
+            <h2 class="tab-title">System Analytics</h2>
+            <div class="analytics-grid"
+                style="padding: 0 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div class="stat-card"
+                    style="background: white; padding: 24px; border-radius: 12px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
+                    <i class="fa-solid fa-users" style="font-size: 32px; color: var(--primary-blue);"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-total-users"
+                            style="font-size: 24px; font-weight: 700; display: block;">0</span>
+                        <span class="stat-label" style="font-size: 14px; color: var(--text-muted);">Total Registered
+                            Users</span>
+                    </div>
+                </div>
+                <div class="stat-card"
+                    style="background: white; padding: 24px; border-radius: 12px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
+                    <i class="fa-solid fa-user-doctor" style="font-size: 32px; color: #2E7D32;"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-total-pharmacists"
+                            style="font-size: 24px; font-weight: 700; display: block;">0</span>
+                        <span class="stat-label" style="font-size: 14px; color: var(--text-muted);">Active
+                            Pharmacists</span>
+                    </div>
+                </div>
+                <div class="stat-card"
+                    style="background: white; padding: 24px; border-radius: 12px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px;">
+                    <i class="fa-solid fa-receipt" style="font-size: 32px; color: #FF9800;"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-total-orders"
+                            style="font-size: 24px; font-weight: 700; display: block;">0</span>
+                        <span class="stat-label" style="font-size: 14px; color: var(--text-muted);">Total Orders</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Admin Inventory & Refills -->
+        <div class="tab-content" id="tab-admin-inventory">
+            <h2 class="tab-title">Inventory & Refill Oversight</h2>
+
+            <div class="admin-container" style="padding: 0 20px; overflow-y: auto;">
+                <h3 class="section-subtitle"
+                    style="margin-bottom: 30px; font-size: 18px; color: var(--text-main); font-weight: 600;">Current
+                    Stock Levels</h3>
+                <div class="medicines-grid" id="admin-inventory-grid" style="padding: 0 0 40px 0;">
+                    <!-- Populated by JS -->
+                </div>
+
+                <h3 class="section-subtitle"
+                    style="margin-bottom: 12px; font-size: 18px; color: var(--text-main); font-weight: 600;"><i
+                        class="fa-solid fa-bell" style="color: #FF9800;"></i> Proactive Refill Alerts</h3>
+                <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;">Recommended refills based on
+                    upcoming patient deadlines.</p>
+                <div class="refills-list" id="admin-refills-list" style="margin-bottom: 40px;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Notifications (Combined for all roles) -->
+        <div class="tab-content" id="tab-notifications">
+            <h2 class="tab-title" id="notif-tab-title">Notifications</h2>
+            <div class="admin-container" style="padding: 0 20px;">
+                <div class="notifications-list" id="notifications-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Dummy Payment Modal -->
+        <div class="payment-modal" id="payment-modal" style="display:none;">
+            <div class="payment-box">
+                <div class="payment-icon"><i class="fa-solid fa-credit-card"></i></div>
+                <h3>Confirm Order Payment</h3>
+                <p id="payment-med-name" class="payment-item-name">Loading...</p>
+                <p id="payment-med-price" class="payment-price">₹0.00</p>
+
+                <!-- Quantity Selection -->
+                <div class="quantity-sec" style="margin: 15px 0; border-top: 1px solid #eee; padding-top: 15px;">
+                    <label style="font-size: 14px; color: var(--text-muted); display: block; margin-bottom: 8px;">Select
+                        Quantity Units:</label>
+                    <input type="number" id="order-quantity" value="1" min="1" class="file-input"
+                        style="width: 80px; text-align: center; margin-bottom: 5px;">
+                    <span style="font-size: 14px; color: var(--text-main); margin-left: 8px;">Units</span>
+                </div>
+
+                <!-- Prescription Upload Section -->
+                <div class="prescription-upload-sec" id="prescription-section" style="display: none;">
+                    <p class="prescription-warning"><i class="fa-solid fa-triangle-exclamation"></i> Prescription
+                        Required
+                    </p>
+                    <input type="file" id="prescription-file" accept="image/*,.pdf" class="file-input">
+                </div>
+
+                <div class="payment-actions">
+                    <button class="auth-btn secondary-btn" id="cancel-payment">Cancel</button>
+                    <button class="auth-btn primary-btn" id="confirm-payment">Pay Now</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="script.js"></script>
+</body>
+
+</html>

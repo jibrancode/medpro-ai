@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+index.db
+.ipynb_checkpoints/
+.vscode/
+.idea/
+node_modules/
+.DS_Store
