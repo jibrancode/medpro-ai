@@ -1,6 +1,7 @@
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
+from langfuse.decorators import observe
 from db import check_stock, execute_action
 
 # Load environment variables from .env file
@@ -48,22 +49,22 @@ if api_key:
         tools=[check_stock, execute_action],
         system_instruction=system_instruction
     )
-    # Start a chat session with automatic function calling enabled
-    # This automatically executes the python function and returns the result to the model
     chat_session = model.start_chat(enable_automatic_function_calling=True)
 else:
     model = None
     chat_session = None
 
+@observe(name="PharmacyAgentChat")
 def chat_with_agent(user_message: str) -> str:
     """
     Sends the user message to the Gemini AI Agent. 
-    The Agent can automatically use the check_stock tool if needed.
+    The Agent can automatically use defined tools.
     """
     if not chat_session:
         return "Error: Gemini API key is missing. Please check your .env file."
         
     try:
+        # Langfuse will automatically capture input 'user_message' and the return 'response.text'
         response = chat_session.send_message(user_message)
         return response.text
     except Exception as e:

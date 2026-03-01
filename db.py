@@ -7,6 +7,9 @@ DB_FILE = os.path.join(os.path.dirname(__file__), "index.db")
 # List of generic names or keywords that require a prescription
 RX_REQUIRED_KEYWORDS = ["Antibiotic", "Steroid", "Opioid", "Ciprofloxacin", "Azithromycin", "Amoxicillin", "Metformin", "Losartan"]
 
+from langfuse.decorators import observe
+
+@observe(name="Tool:CheckStock")
 def check_stock(query: str) -> str:
     """
     Search the database for medicines matching the query in their name or description.
@@ -60,6 +63,8 @@ def check_stock(query: str) -> str:
         
     except Exception as e:
         return f"Database error: {str(e)}"
+
+@observe(name="Tool:ExecuteAction")
 def execute_action(action_type: str, med_name: str, quantity: int = 1, details: str = "") -> str:
     """
     Executes a real-world action such as updating the database for an order 
